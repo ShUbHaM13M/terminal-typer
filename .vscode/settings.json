@@ -1,0 +1,5 @@
+{
+  "python.analysis.autoImportCompletions": true,
+  "editor.tabSize": 4,
+  "python.analysis.typeCheckingMode": "basic"
+}

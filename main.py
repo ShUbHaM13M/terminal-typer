@@ -1,5 +1,10 @@
+from src.app import TerminalTyper
+
+
 def main():
-    print("Hello, World!")
+    app = TerminalTyper()
+    app.run()
+
 
 if __name__ == "__main__":
     main()
