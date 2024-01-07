@@ -1,27 +1,3 @@
 Screen {
 	align: center middle;
 }
-
-#paragraph {
-	height: auto;
-	width: 80;
-	margin-bottom: 1;
-	border: round $surface-lighten-3;
-	padding: 1;
-	overflow-y: hidden;
-}
-
-#type-input {
-	width: 80;
-	background: transparent;
-	border: round $surface-lighten-3;
-	padding: 1;
-	height: auto;
-}
-#type-input:focus {
-	border: round $accent;
-}
-
-Middle {
-	align: center middle;
-}
