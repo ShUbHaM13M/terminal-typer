@@ -19,7 +19,7 @@ class TypingScreen(Screen):
     check_text: Dict[int, Word]
 
     def action_toggle_dark(self) -> None:
-        self.dark = not self.dark
+        self.app.dark = not self.app.dark
 
     def on_type_input_change(self, value: str) -> None:
         assert self.type_input is not None
