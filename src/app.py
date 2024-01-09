@@ -13,8 +13,12 @@ class TerminalTyper(App):
         "typing": TypingScreen(),
     }
 
+    selected_time: int = 1
+    selected_difficulty: str
+
     def on_mount(self) -> None:
         self.push_screen("initial")
 
     def action_toggle_dark(self) -> None:
+        self.log(self.selected_difficulty)
         self.dark = not self.dark

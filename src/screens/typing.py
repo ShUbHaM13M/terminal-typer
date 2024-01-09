@@ -1,8 +1,9 @@
 from typing import List, Dict
 from textual.app import ComposeResult
 from textual.screen import Screen
-from textual.containers import Middle
+from textual.containers import Middle, Center
 from textual.widgets import RichLog, Input, Header, Footer
+from src.widgets.timer import TypingTimer
 
 from src.data.sentences import Word, WordState, get_random_sentence
 
@@ -14,6 +15,8 @@ class TypingScreen(Screen):
     BINDINGS = [("d", "toggle_dark", "Toggle dark mode")]
     paragraph: RichLog | None = None
     type_input: Input | None = None
+    timer: TypingTimer | None = None
+
     current_index: int = 0
     current_text: List[str] = []
     check_text: Dict[int, Word]
@@ -23,15 +26,21 @@ class TypingScreen(Screen):
 
     def on_type_input_change(self, value: str) -> None:
         assert self.type_input is not None
+        assert self.timer is not None
+
+        if not self.timer.timer_running:
+            self.timer.start_timer()
+
         words = value.split(" ")
         self.current_index = len(words) - 1
         if self.current_index >= len(self.current_text):
             self.generate_new_sentence()
             self.type_input.clear()
 
-        # TODO: Optimization: prevent looping over the words which are ahead of the current index
         for index, word in self.check_text.items():
-            word.state = WordState.NORMAL
+            if index > self.current_index:
+                word.state = WordState.NORMAL
+                break
             if index == self.current_index:
                 self.check_text[index].state = WordState.CURRENT
 
@@ -77,8 +86,9 @@ class TypingScreen(Screen):
         self.update_markup()
 
     def on_mount(self):
-        self.paragraph = self.query_one(RichLog)
-        self.type_input = self.query_one(Input)
+        self.paragraph = self.query("#paragraph").only_one()  # type: ignore
+        self.type_input = self.query("#type-input").only_one()  # type: ignore
+        self.timer = self.query("#timer").only_one()  # type: ignore
         self.generate_new_sentence()
 
     def compose(self) -> ComposeResult:
@@ -96,4 +106,15 @@ class TypingScreen(Screen):
             placeholder="Type...",
             id="type-input",
         )
-        yield Middle(richlog, input)
+        yield Center(
+            TypingTimer(
+                self.app.selected_time,  # type: ignore
+                id="timer",
+            ),
+            Middle(richlog, input),
+            id="container",
+        )
+
+    def on_typing_timer_timer_end(self) -> None:
+        assert self.type_input is not None
+        self.type_input.disabled = True

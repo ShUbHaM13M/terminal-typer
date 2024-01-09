@@ -1,3 +1,5 @@
+from typing import List, Tuple
+from enum import Enum
 from textual import on
 from textual.app import ComposeResult
 from textual.screen import Screen
@@ -11,7 +13,7 @@ TIME_OPTIONS = [
     ("10 Minute", 10),
 ]
 
-DIFFICULTY_OPTIONS = [
+DIFFICULTY_OPTIONS: List[Tuple[str, str]] = [
     ("Easy", "easy"),
     ("Medium", "medium"),
     ("Hard", "hard"),
@@ -48,6 +50,13 @@ class InitialScreen(Screen):
         )
         container.border_title = "Terminal Typer"
         yield container
+
+    @on(Select.Changed)
+    def select_changed(self, event: Select.Changed) -> None:
+        if event.select.id == "time-select":
+            self.app.selected_time = event.value if isinstance(event.value, int) else 1
+        if event.select.id == "difficulty-select":
+            self.app.selected_difficulty = event.value
 
     @on(Button.Pressed)
     def on_button_pressed(self, event: Button.Pressed) -> None:
