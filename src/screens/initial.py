@@ -1,5 +1,4 @@
 from typing import List, Tuple
-from enum import Enum
 from textual import on
 from textual.app import ComposeResult
 from textual.screen import Screen
@@ -8,6 +7,7 @@ from textual.containers import Grid
 
 TIME_OPTIONS = [
     ("1 Minute", 1),
+    ("2 Minute", 2),
     ("3 Minute", 3),
     ("5 Minute", 5),
     ("10 Minute", 10),

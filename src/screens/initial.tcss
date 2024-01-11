@@ -1,6 +1,6 @@
 #initial-screen {
 	align: center middle;
-	border: ascii $accent;
+	border: round $accent;
 	height: auto;
 	grid-size: 2;
 	grid-rows: 3;

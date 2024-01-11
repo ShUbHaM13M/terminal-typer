@@ -20,9 +20,29 @@ class TypingScreen(Screen):
     current_index: int = 0
     current_text: List[str] = []
     check_text: Dict[int, Word]
+    correct_word_count: int = 0
 
     def action_toggle_dark(self) -> None:
         self.app.dark = not self.app.dark
+
+    def highlight_text(self, words: List[str]) -> None:
+        for index, word in self.check_text.items():
+            if index > self.current_index:
+                word.state = WordState.NORMAL
+            if index == self.current_index:
+                self.check_text[index].state = WordState.CURRENT
+
+            if index < self.current_index:
+                if word.value == words[index]:
+                    word.state = WordState.CORRECT
+                else:
+                    word.state = WordState.INCORRECT
+
+    def check_correct_words(self, words: List[str]) -> None:
+        for word in self.check_text.values():
+            for input_word in words:
+                if word.value == input_word:
+                    self.correct_word_count += 1
 
     def on_type_input_change(self, value: str) -> None:
         assert self.type_input is not None
@@ -34,22 +54,11 @@ class TypingScreen(Screen):
         words = value.split(" ")
         self.current_index = len(words) - 1
         if self.current_index >= len(self.current_text):
+            self.check_correct_words(words)
             self.generate_new_sentence()
             self.type_input.clear()
 
-        for index, word in self.check_text.items():
-            if index > self.current_index:
-                word.state = WordState.NORMAL
-                break
-            if index == self.current_index:
-                self.check_text[index].state = WordState.CURRENT
-
-            if index < self.current_index:
-                if word.value == words[index]:
-                    word.state = WordState.CORRECT
-                else:
-                    word.state = WordState.INCORRECT
-
+        self.highlight_text(words)
         self.update_markup()
 
     def on_input_changed(self, event: Input.Changed):
@@ -77,7 +86,7 @@ class TypingScreen(Screen):
         self.paragraph.write(markup)
 
     def generate_new_sentence(self):
-        self.current_text = get_random_sentence().strip().split()
+        self.current_text = get_random_sentence(self.app.selected_difficulty)
         self.check_text = {
             index: Word(current_word, WordState.NORMAL)
             for index, current_word in enumerate(self.current_text)
@@ -88,6 +97,7 @@ class TypingScreen(Screen):
     def on_mount(self):
         self.paragraph = self.query("#paragraph").only_one()  # type: ignore
         self.type_input = self.query("#type-input").only_one()  # type: ignore
+        self.type_input.focus(scroll_visible=False)
         self.timer = self.query("#timer").only_one()  # type: ignore
         self.generate_new_sentence()
 
@@ -118,3 +128,8 @@ class TypingScreen(Screen):
     def on_typing_timer_timer_end(self) -> None:
         assert self.type_input is not None
         self.type_input.disabled = True
+        words = self.type_input.value.split(" ")
+        self.highlight_text(words)
+        self.check_correct_words(words)
+        self.app.correct_words = self.correct_word_count
+        self.app.push_screen("stats")

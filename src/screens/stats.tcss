@@ -1,0 +1,6 @@
+
+#container {
+    border: round $accent;
+    height: auto;
+    padding: 1;
+}
